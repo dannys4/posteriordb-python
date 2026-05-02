@@ -11,15 +11,19 @@ from .util import drop_keys
 
 class Posterior:
     def __init__(
-        self, name: str, posterior_db: Union[PosteriorDatabase, PosteriorDatabaseGithub]
+        self, name: str, posterior_db: Union[PosteriorDatabase, PosteriorDatabaseGithub, str, dict]
     ):
         self.name = name
+        if posterior_db is not dict:
+            assert name in posterior_db.posterior_names()
 
-        assert name in posterior_db.posterior_names()
+            self.posterior_db = posterior_db
 
-        self.posterior_db = posterior_db
+            self.posterior_info = posterior_db.get_posterior_info(name)
+        else:
+            self.posterior_db = None
 
-        self.posterior_info = posterior_db.get_posterior_info(name)
+            self.posterior_info = posterior_db
 
         self.model = Model(self.posterior_info["model_name"], posterior_db)
 
@@ -38,11 +42,6 @@ class Posterior:
 
     def reference_draws(self):
         reference_name = self.reference_draws_info()["name"]
-        file_path = self.reference_draws_file_path()
-        if file_path.exists():
-            with ZipFile(file_path, "r") as z:
-                with z.open(reference_name + ".json", "r") as f:
-                    reference_draws =  json.load(f)
-        else:
-            raise ValueError(f"Missing reference_draws: {file_path}")
-        return reference_draws
+        with ZipFile(self.reference_draws_file_path() + ".zip", "r") as z:
+            with z.open(reference_name + ".json", "r") as f:
+                return json.load(f)
