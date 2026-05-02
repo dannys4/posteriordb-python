@@ -4,7 +4,7 @@ from zipfile import ZipFile
 
 from .dataset import Dataset
 from .model import Model
-from .posterior_database import PosteriorDatabase
+from .posterior_database import PosteriorDatabase, load_json_file
 from .posterior_database_github import PosteriorDatabaseGithub
 from .util import drop_keys
 
@@ -14,12 +14,14 @@ class Posterior:
         self, name: str, posterior_db: Union[PosteriorDatabase, PosteriorDatabaseGithub, str, dict]
     ):
         self.name = name
-        if posterior_db is not dict:
+        if isinstance(posterior_db, PosteriorDatabase) or isinstance(posterior_db, PosteriorDatabaseGithub):
             assert name in posterior_db.posterior_names()
 
             self.posterior_db = posterior_db
 
             self.posterior_info = posterior_db.get_posterior_info(name)
+        elif isinstance(posterior_db, str):
+            self.posterior_info = load_json_file(posterior_db)
         else:
             self.posterior_db = None
 
