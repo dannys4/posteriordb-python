@@ -18,3 +18,4 @@ src/posteriordb.egg-info/dependency_links.txt
 src/posteriordb.egg-info/not-zip-safe
 src/posteriordb.egg-info/requires.txt
 src/posteriordb.egg-info/top_level.txt
+tests/test_pdb.py
